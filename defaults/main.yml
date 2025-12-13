@@ -1,0 +1,19 @@
+# List of devices to prepare on this host.
+# Each item describes a disk and its partitions/mounts.
+disk_devices: []
+
+# Services to stop/start automatically during migrations, by path.
+# You can override this in inventories if you want to add DBs.
+storage_service_hints:
+  "/var/log":
+    stop:  [systemd-journald]
+    start: [systemd-journald]
+
+# Remove lost+found after mounting? (purely cosmetic)
+disk_remove_lostfound: true
+
+disk_label_default: gpt
+disk_fs_default: ext4
+disk_mount_opts_default: defaults
+
+disk_debug: true

@@ -1,0 +1,77 @@
+- name: Wait for the device to exist
+  ansible.builtin.wait_for:
+    path: "{{ d.device }}"
+    state: present
+    timeout: 300
+  check_mode: no
+  tags: [disk, disk:wait]
+
+- name: Detect current label (PTTYPE)
+  ansible.builtin.command: "lsblk -no PTTYPE {{ d.device }}"
+  register: _pttype
+  changed_when: false
+  check_mode: no
+  tags: [disk, disk:probe]
+
+# --------- DEBUG --------------
+- name: DEBUG full _pttype
+  ansible.builtin.debug:
+    var: _pttype
+  when: disk_debug | bool
+  tags: [disk, debug]
+
+- name: DEBUG detected label (clean)
+  ansible.builtin.debug:
+    msg: "Device={{ d.device }} PTTYPE={{ (_pttype.stdout | default('')) | lower }}"
+  when: disk_debug | bool
+  tags: [disk, debug]
+# --------- /DEBUG -------------
+
+- name: Create disk label if needed
+  ansible.builtin.shell: "parted -s {{ d.device }} mklabel {{ d.label | default(disk_label_default) }}"
+  when: (_pttype.stdout | default('')) != (d.label | default(disk_label_default)) and not ansible_check_mode
+  tags: [disk, disk:mklabel]
+
+- name: Create declared partitions
+  when: d.parts is defined
+  community.general.parted:
+    device: "{{ d.device }}"
+    number: "{{ item.number }}"
+    part_start: "{{ item.start }}"
+    part_end: "{{ item.end }}"
+    state: present
+  loop: "{{ d.parts }}"
+  loop_control:
+    label: "p{{ item.number }} {{ item.start }}→{{ item.end }}"
+  tags: [disk, disk:parted]
+
+- name: Notify the kernel (partprobe)
+  ansible.builtin.command: "partprobe {{ d.device }}"
+  changed_when: false
+  tags: [disk, disk:probe]
+
+- name: Wait for udev to process events
+  ansible.builtin.command: "udevadm settle"
+  changed_when: false
+  tags: [disk, disk:probe]
+
+- name: Wait for partitions to appear
+  vars:
+    part_suffix: "{{ 'p' if (d.device is search('nvme|mmcblk')) else '' }}"
+  ansible.builtin.wait_for:
+    path: "{{ d.device }}{{ part_suffix }}{{ item.number }}"
+    state: present
+    timeout: 120
+  loop: "{{ d.parts }}"
+  loop_control:
+    label: "{{ d.device }}{{ part_suffix }}{{ item.number }}"
+  tags: [disk, disk:wait]
+
+- name: Prepare and mount each partition
+  include_tasks: _per_partition.yml
+  when: d.parts is defined
+  loop: "{{ d.parts }}"
+  loop_control:
+    loop_var: p
+    label: "p{{ p.number }}"
+  tags: [disk, disk:partition]

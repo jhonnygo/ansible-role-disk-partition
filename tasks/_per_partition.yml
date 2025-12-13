@@ -1,0 +1,105 @@
+- name: Format partition if needed
+  ansible.builtin.filesystem:
+    fstype: "{{ p.fs | default(disk_fs_default) }}"
+    dev: "{{ d.device }}{{ 'p' if (d.device is search('nvme|mmcblk')) else '' }}{{ p.number }}"
+    opts: "{{ p.mkfs_opts | default(omit) }}"
+  when: not ansible_check_mode
+  tags: [disk, disk:mkfs]
+
+- name: Ensure mount point
+  ansible.builtin.file:
+    path: "{{ p.mount.path }}"
+    state: directory
+    mode: "{{ p.mount.create_mode | default('0755') }}"
+    owner: "{{ p.mount.create_owner | default('root') }}"
+    group: "{{ p.mount.create_group | default('root') }}"
+  tags: [disk, disk:mount]
+
+- name: Determine if migration is requested
+  ansible.builtin.set_fact:
+    _migrate_from: "{{ (p.mount.migrate_from | default('')) or '' }}"
+  tags: [disk, disk:migrate]
+
+- name: Gather list of installed packages
+  ansible.builtin.package_facts:
+    manager: auto
+  tags: [disk, disk:migrate]
+
+- name: Stop services (hint) before migrating
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+  loop: "{{ storage_service_hints.get(_migrate_from, {}).get('stop', []) }}"
+  loop_control: { label: "{{ item }}" }
+  when:
+    - _migrate_from | length > 0
+    - not ansible_check_mode
+    - item == 'systemd-journald' or (item in ansible_facts.packages)
+  failed_when: false
+  tags: [disk, disk:migrate]
+
+- name: Create temporary staging
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: _disk_staging
+  register: _staging
+  when: _migrate_from | length > 0 and not ansible_check_mode
+  tags: [disk, disk:migrate]
+
+- name: Temporarily mount the partition to staging
+  ansible.posix.mount:
+    path: "{{ _staging.path }}"
+    src: "{{ d.device }}{{ 'p' if (d.device is search('nvme|mmcblk')) else '' }}{{ p.number }}"
+    fstype: "{{ p.fs | default(disk_fs_default) }}"
+    opts: defaults
+    state: mounted
+  when: _migrate_from | length > 0 and not ansible_check_mode
+  tags: [disk, disk:migrate]
+
+- name: Copy previous data → staging (rsync)
+  ansible.builtin.command: "rsync -aXS --numeric-ids {{ _migrate_from }}/ {{ _staging.path }}/"
+  changed_when: true
+  when: _migrate_from | length > 0 and not ansible_check_mode
+  tags: [disk, disk:migrate]
+
+- name: Unmount staging and clean up
+  block:
+    - ansible.posix.mount:
+        path: "{{ _staging.path }}"
+        state: unmounted
+    - ansible.builtin.file:
+        path: "{{ _staging.path }}"
+        state: absent
+  when: _migrate_from | length > 0 and not ansible_check_mode
+  tags: [disk, disk:migrate]
+
+- name: Final mount (+ fstab)
+  ansible.posix.mount:
+    path: "{{ p.mount.path }}"
+    src: "{{ d.device }}{{ 'p' if (d.device is search('nvme|mmcblk')) else '' }}{{ p.number }}"
+    fstype: "{{ p.fs | default(disk_fs_default) }}"
+    opts: "{{ p.mount.opts | default('defaults') }}"
+    state: mounted
+  when: not ansible_check_mode
+  tags: [disk, disk:mount]
+
+- name: Start services (hint) after migration
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ storage_service_hints.get(_migrate_from, {}).get('start', []) }}"
+  loop_control: { label: "{{ item }}" }
+  when:
+    - _migrate_from | length > 0
+    - not ansible_check_mode
+    - item == 'systemd-journald' or (item in ansible_facts.packages)
+  failed_when: false
+  tags: [disk, disk:migrate]
+
+- name: Remove lost+found
+  ansible.builtin.file:
+    path: "{{ p.mount.path }}/lost+found"
+    state: absent
+  when: disk_remove_lostfound | bool
+  tags: [disk, disk:polish]

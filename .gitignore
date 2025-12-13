@@ -1,0 +1,90 @@
+# This project is provided for personal purposes.
+# Its goal is to increase productivity.
+# Collecting and using libraries created for that purpose.
+#
+# Copyright (c) 2025–present JHONCYTECH <soporte@jhoncytech.com>
+#
+# @author Jhonny Gomez <jh0nny@jhoncytech.com>
+#
+# -------------------------
+# Ansible role / Python / Molecule / Editors
+# -------------------------
+
+# Ansible
+*.retry
+ansible.log
+inventory/*/artifacts/
+inventory/*/.cache/
+vault_pass.txt
+*.vault_pass
+*.vault_password
+*.secret
+*.key
+
+# Molecule
+.molecule/
+molecule/*/state.yml
+molecule/*/instance_config.yml
+molecule/*/converge.log
+molecule/*/logs/
+molecule/*/.molecule/
+
+# Python
+__pycache__/
+*.py[cod]
+*.$py.class
+.pytest_cache/
+.tox/
+.venv/
+venv/
+env/
+ENV/
+.egg-info/
+.eggs/
+dist/
+build/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+pytestdebug.log
+
+# OS / Editors
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+~$*
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.rej
+
+# JetBrains / VS Code / Others
+.idea/
+.vscode/
+*.iml
+
+# Git / Misc
+*.log
+*.out
+*.err
+
+# Windows alternate stream artifacts (si moviste archivos desde Windows)
+*:*Zone.Identifier
+
+# Node / frontend (por si usas test harnesses)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Terraform (por si convive con IaC en el repo)
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+terraform.tfvars

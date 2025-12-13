@@ -1,0 +1,61 @@
+extends: default
+
+ignore: |
+  .venv/
+  venv/
+  env/
+  .molecule/
+  molecule/*/state.yml
+  molecule/*/logs/
+  collections/
+  roles/*/.galaxy_install_info
+  node_modules/
+  dist/
+  build/
+  __pycache__/
+  *.egg-info/
+
+rules:
+  # Long lines aren't a big deal in Ansible templates/vars; warn instead of error.
+  line-length:
+    max: 140
+    level: warning
+
+  # Enforce boolean style; we prefer true/false over yes/no/on/off.
+  truthy:
+    allowed-values: ['true', 'false']
+    check-keys: false
+
+  # Many Ansible files omit '---' intentionally; don't force it.
+  document-start: disable
+
+  # Keep comments tidy but not too strict.
+  comments-indentation:
+    level: warning
+
+  # Two-space indentation; sequences aligned; don't nitpick folded blocks.
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+    check-multi-line-strings: false
+
+  # Consistent Unix newlines.
+  new-lines:
+    type: unix
+
+  # No trailing spaces please.
+  trailing-spaces: enable
+
+  # Manage vertical whitespace.
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1
+
+  # Style nits
+  colons:
+    max-spaces-before: 0
+    max-spaces-after: 1
+
+  hyphens:
+    max-spaces-after: 1

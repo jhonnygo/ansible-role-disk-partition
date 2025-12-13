@@ -1,0 +1,14 @@
+# CHANGELOG
+
+## [0.1.5] - 2025-10-05
+- Remove requirements to `disk` role.
+
+## [0.1.4] - 2025-10-05
+- Added requirements to `disk` role.
+
+## [0.1.3] - 2025-10-02
+- Updated docs of the `disk` role.
+
+## [0.1.2] - 2025-10-02
+- Initial release of the `disk` role.
+- Partitioning, mkfs, idempotent mounting, and optional migration.

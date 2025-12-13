@@ -1,0 +1,24 @@
+# meta/main.yml
+galaxy_info:
+  role_name: disk_partition
+  author: Jhonny Gomez (JhonnyGO) - <soporte@Jhoncytech.com>
+  description: >
+    Idempotent role to partition, format and mount block devices on Linux.
+    Supports GPT/MSDOS labels, udev settle, safe /var/log migration and fstab management.
+  license: MIT
+  min_ansible_version: "2.13"
+
+  platforms:
+    - name: Ubuntu
+      versions: ["focal", "jammy"]
+
+  galaxy_tags:
+    - disk
+    - storage
+    - partition
+    - filesystem
+    - nvme
+    - linux
+    - devops
+
+dependencies: []

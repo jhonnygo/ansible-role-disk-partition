@@ -1,0 +1,45 @@
+# galaxy.yml — Metadata used by Ansible Galaxy importer (roles & collections)
+
+namespace: jhonnygo
+name: disk_partition
+version: 0.1.0
+readme: README.md
+description: >
+  Idempotent role to partition, format and mount block devices on Linux.
+  Supports GPT/MSDOS labels, udev settle, safe /var/log migration and fstab management.
+authors:
+  - "Jhonny Gomez - JhonnyGO <support@jhoncytech.com>"
+
+license: [MIT]
+tags:
+  - linux
+  - storage
+  - disks
+  - partition
+  - filesystem
+  - ext4
+  - gpt
+  - devops
+  - ansible-role
+
+repository: https://github.com/jhonnygo-org/ansible-role-disk-partition
+issues: https://github.com/jhonnygo-org/ansible-role-disk-partition/issues
+homepage: https://github.com/jhonnygo-org/ansible-role-disk-partition
+
+# Files & directories to exclude from the Galaxy build artifact
+build_ignore:
+  - ".git*"
+  - ".DS_Store"
+  - ".idea"
+  - ".vscode"
+  - ".venv"
+  - ".pytest_cache"
+  - "tests/"
+  - "test/"
+  - "molecule/"
+  - "docs/"
+  - "examples/"
+  - "Vagrantfile"
+  - "*.tar.gz"
+  - "*.zip"
+  - "Makefile"
