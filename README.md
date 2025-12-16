@@ -1,3 +1,6 @@
+<img src="img/header.jpg?raw=true" alt="Header Logo" width="100%" />
+<br /><br />
+
 # Ansible Role: **disk_partition**
 [![Style: ansible-lint](https://img.shields.io/badge/style-ansible--lint-green)](#lint)
 [![Tests: molecule](https://img.shields.io/badge/tests-molecule-blue)](#testing)
@@ -52,8 +55,7 @@ config-mgmt/ansible
 ├── ansible.cfg
 ├── .ansible
 │   ├── collections/
-│   │   ├── ansible_collections/
-│   │   └── requirements.yml
+│   │   └── ansible_collections/
 │   └── roles/
 │       └── jhonnygo.disk_partition/
 │           ├── CHANGELOG
@@ -96,7 +98,7 @@ config-mgmt/ansible
 │       └── stage/ ...
 │
 ├── playbooks/
-│   ├── disk.yml
+│   ├── disk-partition.yml
 │   └── ping.yml
 └── requirements/
     ├── collections.yml
